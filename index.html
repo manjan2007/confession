@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Confession Wall</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background: #333;
+            color: white;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .confession {
+            background: #222;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+        }
+        .reactions span {
+            cursor: pointer;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Anonymous Confession Wall</h2>
+        <select id="groupSelect">
+            <option value="General">General</option>
+            <option value="School">School</option>
+            <option value="Crush">Crush</option>
+            <option value="Crazy Secrets">Crazy Secrets</option>
+        </select>
+        <textarea id="confessionInput" placeholder="Write your confession..."></textarea>
+        <button onclick="submitConfession()">Submit Confession</button>
+        <div id="confessions"></div>
+    </div>
+
+    <script>
+        function submitConfession() {
+            let confessionText = document.getElementById("confessionInput").value;
+            let group = document.getElementById("groupSelect").value;
+            
+            if (confessionText.trim() === "") {
+                alert("Please write something!");
+                return;
+            }
+            
+            let confessionDiv = document.createElement("div");
+            confessionDiv.className = "confession";
+            confessionDiv.innerHTML = `<p><strong>${group}:</strong> ${confessionText}</p>
+                <div class='reactions'>
+                    <span onclick="react(this, '😂')">😂 <span class='count'>0</span></span>
+                    <span onclick="react(this, '😱')">😱 <span class='count'>0</span></span>
+                    <span onclick="react(this, '🔥')">🔥 <span class='count'>0</span></span>
+                    <span onclick="react(this, '😳')">😳 <span class='count'>0</span></span>
+                </div>`;
+            
+            document.getElementById("confessions").prepend(confessionDiv);
+            document.getElementById("confessionInput").value = "";
+        }
+
+        function react(emoji, type) {
+            let countSpan = emoji.querySelector('.count');
+            let count = parseInt(countSpan.innerText);
+            countSpan.innerText = count + 1;
+        }
+    </script>
+</body>
+</html>
