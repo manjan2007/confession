@@ -81,16 +81,23 @@
         const chatContainer = document.getElementById("chatContainer");
 
         function sendMessage() {
-            let message = document.getElementById("messageInput").value;
-            if (message.trim() === "") return;
+            let messageInput = document.getElementById("messageInput");
+            let message = messageInput.value.trim();
+            if (message === "") return;
             
             let messageData = {
                 text: message,
                 timestamp: Date.now(),
                 reactions: {}
             };
-            db.ref(`messages/${currentGroup}`).push(messageData);
-            document.getElementById("messageInput").value = "";
+            
+            db.ref(`messages/${currentGroup}`).push(messageData)
+                .then(() => {
+                    messageInput.value = "";
+                })
+                .catch(error => {
+                    console.error("Error sending message:", error);
+                });
         }
 
         function loadMessages() {
@@ -108,6 +115,8 @@
                     msgDiv.innerHTML = `${msgData.text} <span class="reaction" onclick="addReaction('${childSnapshot.key}')">❤️ ${msgData.reactions.heart || 0}</span>`;
                     chatContainer.prepend(msgDiv);
                 });
+            }, error => {
+                console.error("Error loading messages:", error);
             });
         }
 
