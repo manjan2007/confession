@@ -53,7 +53,7 @@
 <body>
     <div class="container">
         <h2>Reverse Social Media - Crazy AI Chat 🔄📱</h2>
-        <select id="groupSelect">
+        <select id="groupSelect" onchange="loadMessages()">
             <option value="school">School</option>
             <option value="crush">Crush</option>
             <option value="secrets">Crazy Secrets</option>
@@ -77,8 +77,10 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        let currentGroup = "school";
+        const chatContainer = document.getElementById("chatContainer");
+
         function sendMessage() {
-            let group = document.getElementById("groupSelect").value;
             let message = document.getElementById("messageInput").value;
             if (message.trim() === "") return;
             
@@ -87,30 +89,33 @@
                 timestamp: Date.now(),
                 reactions: {}
             };
-            db.ref(`messages/${group}`).push(messageData);
+            db.ref(`messages/${currentGroup}`).push(messageData);
             document.getElementById("messageInput").value = "";
         }
 
         function loadMessages() {
-            let group = document.getElementById("groupSelect").value;
-            let chatContainer = document.getElementById("chatContainer");
+            currentGroup = document.getElementById("groupSelect").value;
             chatContainer.innerHTML = "";
             
-            db.ref(`messages/${group}`).on("child_added", snapshot => {
-                let msgData = snapshot.val();
-                let msgDiv = document.createElement("div");
-                msgDiv.className = "message";
-                msgDiv.innerHTML = `${msgData.text} <span class="reaction" onclick="addReaction('${snapshot.key}', '${group}')">❤️ ${msgData.reactions.heart || 0}</span>`;
-                chatContainer.prepend(msgDiv);
+            db.ref(`messages/${currentGroup}`).off(); // Remove previous listeners to avoid duplication
+            
+            db.ref(`messages/${currentGroup}`).on("value", snapshot => {
+                chatContainer.innerHTML = "";
+                snapshot.forEach(childSnapshot => {
+                    let msgData = childSnapshot.val();
+                    let msgDiv = document.createElement("div");
+                    msgDiv.className = "message";
+                    msgDiv.innerHTML = `${msgData.text} <span class="reaction" onclick="addReaction('${childSnapshot.key}')">❤️ ${msgData.reactions.heart || 0}</span>`;
+                    chatContainer.prepend(msgDiv);
+                });
             });
         }
 
-        function addReaction(msgKey, group) {
-            let ref = db.ref(`messages/${group}/${msgKey}/reactions/heart`);
+        function addReaction(msgKey) {
+            let ref = db.ref(`messages/${currentGroup}/${msgKey}/reactions/heart`);
             ref.transaction(count => (count || 0) + 1);
         }
 
-        document.getElementById("groupSelect").addEventListener("change", loadMessages);
         loadMessages();
     </script>
 </body>
